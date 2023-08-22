@@ -2,7 +2,32 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
+
+# Constants
 BLUE = "#ECF2FF"
+WHITE = "#FFFFFF"
+BLACK = "#000000"
+GRAY = "#E0E0E0"
+HEIGHT = 5
+FONT = ("Arial", 10,)
+
+
+# ---------------------------- SEARCH WEBSITE ------------------------------- #
+def search_website():
+    website = website_entry.get().lower()
+    try:
+        with open("password.json", "r") as data_file:
+            data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(title="Oops", message="No data found.")
+    else:
+        if website in data:
+            email = data[website]["email"]
+            password = data[website]["password"]
+            messagebox.showinfo(title=website, message=f"Email: {email} \nPassword: {password}")
+        else:
+            messagebox.showinfo(title="Oops", message="Website not found.")
 
 
 # ---------------------------- CLEAR WINDOW ------------------------------- #
@@ -32,65 +57,103 @@ def generate_password():
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_password():
+    website = website_entry.get().lower()
+    email = email_entry.get().lower()
+    password = password_entry.get()
+    new_data = {
+        website: {
+            "email": email,
+            "password": password
+        }
+    }
+
     # check if all the fields are filled
-    if len(website_entry.get()) == 0 or len(email_entry.get()) == 0 or len(password_entry.get()) == 0:
+    if len(website) == 0 or len(email) == 0 or len(password) == 0:
         messagebox.showerror("Error", "Please fill all the fields")
     else:
-        is_ok = messagebox.askokcancel(title=f"{website_entry.get()}", message=f"These are the details you "
-                                                                               f"entered:\nEmail: {email_entry.get()} "
-                                                                               f"\nPassword: {password_entry.get()} "
-                                                                               f"\nDo you want to save?")
+        is_ok = messagebox.askokcancel(title=f"{website}", message=f"These are the details you "
+                                                                   f"entered:\nEmail: {email} "
+                                                                   f"\nPassword: {password} "
+                                                                   f"\nDo you want to save?")
         if is_ok:
-            with open("password.txt", "a") as file:
-                file.write(f"{website_entry.get()} | {email_entry.get()} | {password_entry.get()}\n")
-            # clear the fields
-            clear_window()
-            # create a window popup if successfully write to the file
-            messagebox.showinfo("Password Saved", "Password Saved Successfully")
+            try:
+                with open("./data/password.json", "r") as file:
+                    data = json.load(file)
+            except FileNotFoundError:
+                with open("./data/password.json", "w") as file:
+                    json.dump(new_data, file, indent=4)
+            else:
+                if website in data:
+                    current_email = data[website]["email"]
+                    current_password = data[website]["password"]
+                    update_data = messagebox.showwarning(title=f"{website}", message=f"Website already exists. Do you "
+                                                                                     f"want "f"to update the "
+                                                                                     f"credentials?\nCurrent "
+                                                                                     f""f"credentials are: "
+                                                                                     f"\nEmail: {current_email} "
+                                                                                     f""f"\nPassword: "
+                                                                                     f"{current_password}")
+                    if update_data:
+                        data[website]["email"] = email
+                        data[website]["password"] = password
+                        with open("./data/password.json", "w") as file:
+                            json.dump(data, file, indent=4)
+                        messagebox.showinfo(title=f"{website}", message="Password Updated Successfully")
+                    else:
+                        messagebox.showinfo(title=f"{website}", message="Not Saved")
+                else:
+                    data.update(new_data)
+                    with open("./data/password.json", "w") as file:
+                        json.dump(data, file, indent=4)
+                        messagebox.showinfo(title=f"'{website}", message="Password Saved Successfully")
+            finally:
+                # clear the fields
+                clear_window()
+        else:
+            messagebox.showinfo(title=f"{website}", message="Not Saved")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
-window.title("Password Generator")
-window.config(padx=50, pady=50, bg=BLUE)
+window.title("Password Manager")
+window.config(padx=50, pady=50, bg=WHITE)
 
-# create a canvas
-canvas = Canvas(width=200, height=200, bg=BLUE, highlightthickness=0)
+# Logo
+canvas = Canvas(width=200, height=200, bg=WHITE, highlightthickness=0)
 logo_image = PhotoImage(file="./images/logo.png")
 canvas.create_image(100, 100, image=logo_image)
 canvas.grid(row=0, column=1)
 
-# create website label
-website_label = Label(text="Website:", bg=BLUE)
+# Labels and Entry Fields
+website_label = Label(text="Website:", bg=WHITE, font=FONT)
 website_label.grid(row=1, column=0)
 
-# create website entry
-website_entry = Entry(width=35)
-website_entry.grid(row=1, column=1, columnspan=2)
+website_entry = Entry(width=30, bg=GRAY, font=FONT)
+website_entry.grid(row=1, column=1, padx=10, pady=10)
 website_entry.focus()
 
-# create email label
-email_label = Label(text="Email/Username:", bg=BLUE)
+email_label = Label(text="Email/Username:", bg=WHITE, font=FONT)
 email_label.grid(row=2, column=0)
 
-# create email entry
-email_entry = Entry(width=35)
-email_entry.grid(row=2, column=1, columnspan=2)
-email_entry.insert(0, "your email address")
+email_entry = Entry(width=30, bg=GRAY, font=FONT, )
+email_entry.grid(row=2, column=1, padx=10, pady=10)
+email_entry.insert(0, "Email or Username")
 
-# create password label
-password_label = Label(text="Password:", bg=BLUE)
+password_label = Label(text="Password:", bg=WHITE, font=FONT)
 password_label.grid(row=3, column=0)
 
-# create password entry
-password_entry = Entry(width=21)
-password_entry.grid(row=3, column=1)
+password_entry = Entry(width=20, bg=GRAY, font=FONT)
+password_entry.grid(row=3, column=1, padx=10, pady=10)
 
-# create generate button
-generate_button = Button(text="Generate Password", command=generate_password)
-generate_button.grid(row=3, column=2)
+# Buttons
+generate_button = Button(text="Generate Password", command=generate_password, font=FONT)
+generate_button.grid(row=3, column=2, padx=10, pady=10)
 
-# create save button
-save_button = Button(text="Save Password", width=36, command=save_password)
-save_button.grid(row=4, column=1, columnspan=2)
+save_button = Button(text="Save Password", command=save_password, font=FONT)
+save_button.grid(row=4, column=1, padx=10, pady=10)
+
+search_button = Button(text="Search", command=search_website, font=FONT)
+search_button.grid(row=1, column=2, padx=10, pady=10)
+clear_button = Button(text="Clear Window", command=clear_window, font=FONT)
+clear_button.grid(row=4, column=2, padx=10, pady=10)
 window.mainloop()
