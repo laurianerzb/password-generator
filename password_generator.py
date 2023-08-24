@@ -17,15 +17,16 @@ FONT = ("Arial", 10,)
 def search_website():
     website = website_entry.get().lower()
     try:
-        with open("password.json", "r") as data_file:
+        with open("./data/password.json", "r") as data_file:
             data = json.load(data_file)
     except FileNotFoundError:
-        messagebox.showinfo(title="Oops", message="No data found.")
+        messagebox.showinfo(title="Oops", message="No website found.")
     else:
         if website in data:
-            email = data[website]["email"]
+            username = data[website].get("username", "")
+            email = data[website].get("email", "")
             password = data[website]["password"]
-            messagebox.showinfo(title=website, message=f"Email: {email} \nPassword: {password}")
+            messagebox.showinfo(title=website, message=f"Username: {username} \nEmail: {email} \nPassword: {password}")
         else:
             messagebox.showinfo(title="Oops", message="Website not found.")
 
@@ -33,6 +34,7 @@ def search_website():
 # ---------------------------- CLEAR WINDOW ------------------------------- #
 def clear_window():
     website_entry.delete(0, END)
+    username_entry.delete(0, END)
     email_entry.delete(0, END)
     password_entry.delete(0, END)
 
@@ -60,19 +62,24 @@ def save_password():
     website = website_entry.get().lower()
     email = email_entry.get().lower()
     password = password_entry.get()
+    username = username_entry.get().lower()
     new_data = {
         website: {
             "email": email,
-            "password": password
+            "password": password,
+            "username": username
         }
     }
 
     # check if all the fields are filled
-    if len(website) == 0 or len(email) == 0 or len(password) == 0:
-        messagebox.showerror("Error", "Please fill all the fields")
+    if len(website) == 0 and len(password) == 0:
+        messagebox.showerror(title="Oops", message="The website and password fields cannot be empty.")
+    elif len(username) == 0 and len(email) == 0:
+        messagebox.showerror(title="Oops", message="The username and email fields cannot be empty at the same time.")
     else:
-        is_ok = messagebox.askokcancel(title=f"{website}", message=f"These are the details you "
-                                                                   f"entered:\nEmail: {email} "
+        is_ok = messagebox.askokcancel(title=f"{website}", message=f"These are the details you have enter: "
+                                                                   f"\nUsername: {username} "
+                                                                   f"\nEmail: {email} "
                                                                    f"\nPassword: {password} "
                                                                    f"\nDo you want to save?")
         if is_ok:
@@ -84,16 +91,19 @@ def save_password():
                     json.dump(new_data, file, indent=4)
             else:
                 if website in data:
+                    current_username = data[website]["username"]
                     current_email = data[website]["email"]
                     current_password = data[website]["password"]
                     update_data = messagebox.showwarning(title=f"{website}", message=f"Website already exists. Do you "
                                                                                      f"want "f"to update the "
                                                                                      f"credentials?\nCurrent "
                                                                                      f""f"credentials are: "
+                                                                                     f"\nUsername: {current_username} "
                                                                                      f"\nEmail: {current_email} "
                                                                                      f""f"\nPassword: "
                                                                                      f"{current_password}")
                     if update_data:
+                        data[website]["username"] = username
                         data[website]["email"] = email
                         data[website]["password"] = password
                         with open("./data/password.json", "w") as file:
@@ -127,33 +137,36 @@ canvas.grid(row=0, column=1)
 # Labels and Entry Fields
 website_label = Label(text="Website:", bg=WHITE, font=FONT)
 website_label.grid(row=1, column=0)
-
 website_entry = Entry(width=30, bg=GRAY, font=FONT)
 website_entry.grid(row=1, column=1, padx=10, pady=10)
 website_entry.focus()
 
-email_label = Label(text="Email/Username:", bg=WHITE, font=FONT)
-email_label.grid(row=2, column=0)
+username_label = Label(text="Username:", bg=WHITE, font=FONT)
+username_label.grid(row=2, column=0)
+username_entry = Entry(width=30, bg=GRAY, font=FONT, )
+username_entry.grid(row=2, column=1, padx=10, pady=10)
 
+email_label = Label(text="Email/Username:", bg=WHITE, font=FONT)
+email_label.grid(row=3, column=0)
 email_entry = Entry(width=30, bg=GRAY, font=FONT, )
-email_entry.grid(row=2, column=1, padx=10, pady=10)
+email_entry.grid(row=3, column=1, padx=10, pady=10)
 email_entry.insert(0, "Email or Username")
 
 password_label = Label(text="Password:", bg=WHITE, font=FONT)
-password_label.grid(row=3, column=0)
-
+password_label.grid(row=4, column=0)
 password_entry = Entry(width=20, bg=GRAY, font=FONT)
-password_entry.grid(row=3, column=1, padx=10, pady=10)
+password_entry.grid(row=4, column=1, padx=10, pady=10)
 
 # Buttons
 generate_button = Button(text="Generate Password", command=generate_password, font=FONT)
-generate_button.grid(row=3, column=2, padx=10, pady=10)
+generate_button.grid(row=4, column=2, padx=10, pady=10)
 
 save_button = Button(text="Save Password", command=save_password, font=FONT)
-save_button.grid(row=4, column=1, padx=10, pady=10)
+save_button.grid(row=5, column=1, padx=10, pady=10)
 
 search_button = Button(text="Search", command=search_website, font=FONT)
 search_button.grid(row=1, column=2, padx=10, pady=10)
 clear_button = Button(text="Clear Window", command=clear_window, font=FONT)
-clear_button.grid(row=4, column=2, padx=10, pady=10)
+clear_button.grid(row=5, column=2, padx=10, pady=10)
+
 window.mainloop()

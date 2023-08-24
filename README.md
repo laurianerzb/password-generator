@@ -19,8 +19,8 @@ generate and save passwords for various websites along with your email or userna
 for you. The generated passwords include a combination of uppercase and lowercase letters, numbers, and symbols.
 - Password Storage: You can save the details of websites, email addresses, and passwords. The saved data is 
 - stored in a json file named `password.json`.
-- User Interface : The application provides an intuitive user interface where you can input website names, 
-email addresses, clear, and view or generate passwords.
+- User Interface : The application provides an intuitive user interface where you can input website name, 
+username, email address, clear, and view or generate passwords.
 - Credentials recovery: The application provides a search button for any website credentials previously saved.
 
 ## Installation
