@@ -23,6 +23,7 @@ def search_website():
         messagebox.showinfo(title="Oops", message="No website found.")
     else:
         if website in data:
+
             username = data[website].get("username", "")
             email = data[website].get("email", "")
             password = data[website]["password"]
