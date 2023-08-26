@@ -22,14 +22,47 @@ def search_website():
     except FileNotFoundError:
         messagebox.showinfo(title="Oops", message="No website found.")
     else:
-        if website in data:
+        matching_websites = []
 
-            username = data[website].get("username", "")
-            email = data[website].get("email", "")
-            password = data[website]["password"]
-            messagebox.showinfo(title=website, message=f"Username: {username} \nEmail: {email} \nPassword: {password}")
+        # Find matching websites
+        for key in data.keys():
+            if website in key.lower():
+                matching_websites.append(key)
+
+        if matching_websites:
+            listbox = Listbox(window, selectmode=SINGLE)
+            for website in matching_websites:
+                listbox.insert(END, website)
+            listbox.grid(row=2, column=1, padx=10, pady=10)
+
+            def on_select(event):
+                selected_index = listbox.curselection()
+                if selected_index:
+                    selected_website = listbox.get(selected_index)
+                    listbox.grid_forget()
+                    show_website_credentials(selected_website)
+
+            listbox.bind("<<ListboxSelect>>", on_select)
+
         else:
-            messagebox.showinfo(title="Oops", message="Website not found.")
+            messagebox.showinfo(title="Oops", message="No matching websites found.")
+
+
+# ---------------------------- SHOW CREDENTIALS ------------------------------- #
+def show_website_credentials(selected_website):
+    try:
+        with open("./data/password.json", "r") as data_file:
+            data = json.load(data_file)
+            website_data = data[selected_website]
+            username = website_data.get("username", "")
+            email = website_data.get("email", "")
+            password = website_data["password"]
+            messagebox.showinfo(
+                title=selected_website,
+                message=f"Username: {username}\nEmail: {email}\nPassword: {password}"
+            )
+    except Exception as e:
+        messagebox.showerror(title="Error", message=str(e))
 
 
 # ---------------------------- CLEAR WINDOW ------------------------------- #
@@ -147,11 +180,11 @@ username_label.grid(row=2, column=0)
 username_entry = Entry(width=30, bg=GRAY, font=FONT, )
 username_entry.grid(row=2, column=1, padx=10, pady=10)
 
-email_label = Label(text="Email/Username:", bg=WHITE, font=FONT)
+email_label = Label(text="Email:", bg=WHITE, font=FONT)
 email_label.grid(row=3, column=0)
 email_entry = Entry(width=30, bg=GRAY, font=FONT, )
 email_entry.grid(row=3, column=1, padx=10, pady=10)
-email_entry.insert(0, "Email or Username")
+email_entry.insert(0, "")
 
 password_label = Label(text="Password:", bg=WHITE, font=FONT)
 password_label.grid(row=4, column=0)
