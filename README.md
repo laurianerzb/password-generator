@@ -1,6 +1,6 @@
 # Password Generator App
 
-![App Screenshot](./images/pwd_gen.png)
+![App Screenshot](images/pwd_gen.png)
 
 ## Table of Contents
 

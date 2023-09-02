@@ -17,7 +17,7 @@ FONT = ("Arial", 10,)
 def search_website():
     website = website_entry.get().lower()
     try:
-        with open("./data/password.json", "r") as data_file:
+        with open("data/password.json", "r") as data_file:
             data = json.load(data_file)
     except FileNotFoundError:
         messagebox.showinfo(title="Oops", message="No website found.")
@@ -51,7 +51,7 @@ def search_website():
 # ---------------------------- SHOW CREDENTIALS ------------------------------- #
 def show_website_credentials(selected_website):
     try:
-        with open("./data/password.json", "r") as data_file:
+        with open("data/password.json", "r") as data_file:
             data = json.load(data_file)
             website_data = data[selected_website]
             username = website_data.get("username", "")
@@ -118,10 +118,10 @@ def save_password():
                                                                    f"\nDo you want to save?")
         if is_ok:
             try:
-                with open("./data/password.json", "r") as file:
+                with open("data/password.json", "r") as file:
                     data = json.load(file)
             except FileNotFoundError:
-                with open("./data/password.json", "w") as file:
+                with open("data/password.json", "w") as file:
                     json.dump(new_data, file, indent=4)
             else:
                 if website in data:
@@ -140,14 +140,14 @@ def save_password():
                         data[website]["username"] = username
                         data[website]["email"] = email
                         data[website]["password"] = password
-                        with open("./data/password.json", "w") as file:
+                        with open("data/password.json", "w") as file:
                             json.dump(data, file, indent=4)
                         messagebox.showinfo(title=f"{website}", message="Password Updated Successfully")
                     else:
                         messagebox.showinfo(title=f"{website}", message="Not Saved")
                 else:
                     data.update(new_data)
-                    with open("./data/password.json", "w") as file:
+                    with open("data/password.json", "w") as file:
                         json.dump(data, file, indent=4)
                         messagebox.showinfo(title=f"'{website}", message="Password Saved Successfully")
             finally:
@@ -164,7 +164,7 @@ window.config(padx=50, pady=50, bg=WHITE)
 
 # Logo
 canvas = Canvas(width=200, height=200, bg=WHITE, highlightthickness=0)
-logo_image = PhotoImage(file="./images/logo.png")
+logo_image = PhotoImage(file="images/logo.png")
 canvas.create_image(100, 100, image=logo_image)
 canvas.grid(row=0, column=1)
 
